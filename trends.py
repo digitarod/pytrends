@@ -1,26 +1,24 @@
-from pytrends.request import TrendReq
-import datetime
 import json
+import datetime
+from twikit.trends import get_trends
 
-# Googleトレンドに接続
-pytrends = TrendReq(hl='ja-JP', tz=540)
-#trending_searches_df = pytrends.trending_searches(pn='japan')
-trending_searches_df = pytrends.trending_searches(pn='united_states')
+# 日本のWOEID (Yahoo!のWhere On Earth ID) = 23424856
+woeid_japan = 23424856
 
-# 現在の日付を取得
-today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# Twitterの急上昇トレンドを取得
+trends = get_trends(woeid=woeid_japan)
 
-# トレンドデータをリスト化
-trends_list = [row[0] for _, row in trending_searches_df.iterrows()]
+# 現在の日時を取得
+now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# JSONデータを作成
+# JSON形式で保存
 data = {
-    "updated_at": today,
-    "trending_words": trends_list
+    "updated_at": now,
+    "trending_words": [trend["name"] for trend in trends]
 }
 
-# JSONをテキストファイルに保存
+# ファイルに保存
 with open("trends.txt", "w", encoding="utf-8") as f:
     json.dump(data, f, ensure_ascii=False, indent=4)
 
-print("Googleトレンドの急上昇ワードを trends.txt に保存しました。")
+print("Twitterのトレンドを trends.txt に保存しました。")
