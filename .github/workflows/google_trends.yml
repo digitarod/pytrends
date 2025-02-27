@@ -1,0 +1,36 @@
+name: Update Google Trends Text
+
+on:
+  schedule:
+    - cron: '0 21 * * *'  # 日本時間の午前6時 (UTCの21時)
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  update-trends:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v3
+
+      - name: Pythonのセットアップ
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 依存関係のインストール
+        run: pip install -r requirements.txt
+
+      - name: Googleトレンドデータの取得とTXT生成
+        run: python trends.py
+
+      - name: 変更をコミットしてプッシュ
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add trends.txt
+          git commit -m "Update Google Trends TXT" || echo "No changes to commit"
+          git push
